@@ -2,7 +2,7 @@ TODO
 
 1. Add a port so filter can communicate with user mode
  - see https://docs.microsoft.com/en-us/windows-hardware/drivers/ifs/communication-between-user-mode-and-kernel-mode
-
+ - Use FltCreateCommunicationPort
 
 2. Create a user mode program to load the filter driver
 - request privilige to load driver
