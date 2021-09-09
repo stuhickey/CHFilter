@@ -16,6 +16,7 @@ Environment:
 
 #include <fltKernel.h>
 #include <dontuse.h>
+#include <stdlib.h> // for _MAX_PATH 
 
 #pragma prefast(disable:__WARNING_ENCODE_MEMBER_FUNCTION_POINTER, "Not valid for kernel mode drivers")
 
@@ -23,16 +24,6 @@ Environment:
 PFLT_FILTER gFilterHandle;
 ULONG_PTR OperationStatusCtx = 1;
 
-#define PTDBG_TRACE_ROUTINES            0x00000001
-#define PTDBG_TRACE_OPERATION_STATUS    0x00000002
-
-ULONG gTraceFlags = 0;
-
-
-#define PT_DBG_PRINT( _dbgLevel, _string )          \
-    (FlagOn(gTraceFlags,(_dbgLevel)) ?              \
-        DbgPrint _string :                          \
-        ((int)0))
 
 /*************************************************************************
     Prototypes
@@ -133,204 +124,13 @@ EXTERN_C_END
 //
 
 CONST FLT_OPERATION_REGISTRATION Callbacks[] = {
+    { 
+        IRP_MJ_READ,
+        0,
+        CHFilter2PreOperation,
+        CHFilter2PostOperation 
+    },
 
-#if 0 // TODO - List all of the requests to filter.
-    { IRP_MJ_CREATE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_CREATE_NAMED_PIPE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_CLOSE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_READ,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_WRITE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_QUERY_INFORMATION,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_SET_INFORMATION,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_QUERY_EA,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_SET_EA,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_FLUSH_BUFFERS,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_QUERY_VOLUME_INFORMATION,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_SET_VOLUME_INFORMATION,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_DIRECTORY_CONTROL,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_FILE_SYSTEM_CONTROL,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_DEVICE_CONTROL,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_INTERNAL_DEVICE_CONTROL,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_SHUTDOWN,
-      0,
-      CHFilter2PreOperationNoPostOperation,
-      NULL },                               //post operations not supported
-
-    { IRP_MJ_LOCK_CONTROL,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_CLEANUP,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_CREATE_MAILSLOT,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_QUERY_SECURITY,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_SET_SECURITY,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_QUERY_QUOTA,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_SET_QUOTA,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_PNP,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_ACQUIRE_FOR_SECTION_SYNCHRONIZATION,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_RELEASE_FOR_SECTION_SYNCHRONIZATION,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_ACQUIRE_FOR_MOD_WRITE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_RELEASE_FOR_MOD_WRITE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_ACQUIRE_FOR_CC_FLUSH,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_RELEASE_FOR_CC_FLUSH,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_FAST_IO_CHECK_IF_POSSIBLE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_NETWORK_QUERY_OPEN,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_MDL_READ,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_MDL_READ_COMPLETE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_PREPARE_MDL_WRITE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_MDL_WRITE_COMPLETE,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_VOLUME_MOUNT,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-    { IRP_MJ_VOLUME_DISMOUNT,
-      0,
-      CHFilter2PreOperation,
-      CHFilter2PostOperation },
-
-#endif // TODO
 
     { IRP_MJ_OPERATION_END }
 };
@@ -401,8 +201,7 @@ Return Value:
 
     PAGED_CODE();
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!CHFilter2InstanceSetup: Entered\n") );
+    KdPrint(("CHFilter2!CHFilter2InstanceSetup: Entered\n") );
 
     return STATUS_SUCCESS;
 }
@@ -443,8 +242,7 @@ Return Value:
 
     PAGED_CODE();
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!CHFilter2InstanceQueryTeardown: Entered\n") );
+    KdPrint(("CHFilter2!CHFilter2InstanceQueryTeardown: Entered\n") );
 
     return STATUS_SUCCESS;
 }
@@ -479,8 +277,7 @@ Return Value:
 
     PAGED_CODE();
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!CHFilter2InstanceTeardownStart: Entered\n") );
+    KdPrint(("CHFilter2!CHFilter2InstanceTeardownStart: Entered\n") );
 }
 
 
@@ -513,8 +310,7 @@ Return Value:
 
     PAGED_CODE();
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!CHFilter2InstanceTeardownComplete: Entered\n") );
+    KdPrint(("CHFilter2!CHFilter2InstanceTeardownComplete: Entered\n") );
 }
 
 
@@ -552,8 +348,7 @@ Return Value:
 
     UNREFERENCED_PARAMETER( RegistryPath );
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!DriverEntry: Entered\n") );
+    KdPrint( ("CHFilter2!DriverEntry: Entered\n") );
 
     //
     //  Register with FltMgr to tell it our callback routines
@@ -609,8 +404,7 @@ Return Value:
 
     PAGED_CODE();
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!CHFilter2Unload: Entered\n") );
+    KdPrint(("CHFilter2!CHFilter2Unload: Entered\n") );
 
     FltUnregisterFilter( gFilterHandle );
 
@@ -657,38 +451,38 @@ Return Value:
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( CompletionContext );
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!CHFilter2PreOperation: Entered\n") );
+    PFLT_FILE_NAME_INFORMATION FileNameInfo;
+    WCHAR Name[_MAX_PATH] = { 0 }; // TODO: Change this to be dynamically allocated
 
-    //
-    //  See if this is an operation we would like the operation status
-    //  for.  If so request it.
-    //
-    //  NOTE: most filters do NOT need to do this.  You only need to make
-    //        this call if, for example, you need to know if the oplock was
-    //        actually granted.
-    //
+    // Get accessed file name information from the callback data for the IO operation
+    status = FltGetFileNameInformation(Data, FLT_FILE_NAME_NORMALIZED | FLT_FILE_NAME_QUERY_DEFAULT, &FileNameInfo);
 
-    if (CHFilter2DoRequestOperationStatus( Data )) {
+    if (NT_SUCCESS(status))
+    {
+        // Parse the structure 
+        status = FltParseFileNameInformation(FileNameInfo);
 
-        status = FltRequestOperationStatusCallback( Data,
-                                                    CHFilter2OperationStatusCallback,
-                                                    (PVOID)(++OperationStatusCtx) );
-        if (!NT_SUCCESS(status)) {
+        if (NT_SUCCESS(status))
+        {
+            // Check name length for safety
+            if (FileNameInfo->Name.MaximumLength < _MAX_PATH)
+            {
+                // Copy the filename
+                RtlCopyMemory(Name, FileNameInfo->Name.Buffer, FileNameInfo->Name.MaximumLength);
 
-            PT_DBG_PRINT( PTDBG_TRACE_OPERATION_STATUS,
-                          ("CHFilter2!CHFilter2PreOperation: FltRequestOperationStatusCallback Failed, status=%08x\n",
-                           status) );
+                // check whether name contains string "cyberhive"
+                if (wcsstr(Name, L"cyberhive") != NULL)
+                {
+                    // Found the string! - output a debug message
+                    KdPrint(("CHFilter2: File Access detected %ws", Name));
+                }
+            }
         }
+        FltReleaseFileNameInformation(FileNameInfo);
     }
 
-    // This template code does not do anything with the callbackData, but
-    // rather returns FLT_PREOP_SUCCESS_WITH_CALLBACK.
-    // This passes the request down to the next miniFilter in the chain.
-
-    return FLT_PREOP_SUCCESS_WITH_CALLBACK;
+    return FLT_PREOP_SUCCESS_NO_CALLBACK;
 }
-
 
 
 VOID
@@ -733,11 +527,9 @@ Return Value:
 {
     UNREFERENCED_PARAMETER( FltObjects );
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!CHFilter2OperationStatusCallback: Entered\n") );
+    KdPrint(("CHFilter2!CHFilter2OperationStatusCallback: Entered\n") );
 
-    PT_DBG_PRINT( PTDBG_TRACE_OPERATION_STATUS,
-                  ("CHFilter2!CHFilter2OperationStatusCallback: Status=%08x ctx=%p IrpMj=%02x.%02x \"%s\"\n",
+    KdPrint(("CHFilter2!CHFilter2OperationStatusCallback: Status=%08x ctx=%p IrpMj=%02x.%02x \"%s\"\n",
                    OperationStatus,
                    RequesterContext,
                    ParameterSnapshot->MajorFunction,
@@ -785,8 +577,7 @@ Return Value:
     UNREFERENCED_PARAMETER( CompletionContext );
     UNREFERENCED_PARAMETER( Flags );
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!CHFilter2PostOperation: Entered\n") );
+    KdPrint( ("CHFilter2!CHFilter2PostOperation: Entered\n") );
 
     return FLT_POSTOP_FINISHED_PROCESSING;
 }
@@ -827,8 +618,7 @@ Return Value:
     UNREFERENCED_PARAMETER( FltObjects );
     UNREFERENCED_PARAMETER( CompletionContext );
 
-    PT_DBG_PRINT( PTDBG_TRACE_ROUTINES,
-                  ("CHFilter2!CHFilter2PreOperationNoPostOperation: Entered\n") );
+    KdPrint( ("CHFilter2!CHFilter2PreOperationNoPostOperation: Entered\n") );
 
     // This template code does not do anything with the callbackData, but
     // rather returns FLT_PREOP_SUCCESS_NO_CALLBACK.
