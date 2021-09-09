@@ -51,10 +51,6 @@ int main()
 {
     HANDLE port = INVALID_HANDLE_VALUE;
     HRESULT hResult = S_OK;
-    DWORD result;
-    ULONG threadId;
-    HANDLE thread = NULL;
-    CHAR inputChar;
 
     std::cout << "Running ch_test application\n";
 

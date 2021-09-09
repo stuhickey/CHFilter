@@ -1,0 +1,19 @@
+TODO
+
+1. Add a port so filter can communicate with user mode
+ - see https://docs.microsoft.com/en-us/windows-hardware/drivers/ifs/communication-between-user-mode-and-kernel-mode
+
+
+2. Create a user mode program to load the filter driver
+- request privilige to load driver
+- load the driver
+- connect to the port (FilterConnectCommunicationPort)
+- Launch a new thread to monitor the port and output a message
+- Launch a thread to handle user input e.g. press q to quit
+
+3. Release build
+4. Get official altitude for driver
+5. Driver signing
+6. Package for installation
+
+   
