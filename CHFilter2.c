@@ -125,12 +125,25 @@ EXTERN_C_END
 
 CONST FLT_OPERATION_REGISTRATION Callbacks[] = {
     { 
-        IRP_MJ_READ,
+        IRP_MJ_CREATE,
         0,
         CHFilter2PreOperation,
         CHFilter2PostOperation 
     },
 
+    {
+        IRP_MJ_READ,
+        0,
+        CHFilter2PreOperation,
+        CHFilter2PostOperation
+    },
+
+    {
+        IRP_MJ_WRITE,
+        0,
+        CHFilter2PreOperation,
+        CHFilter2PostOperation
+    },
 
     { IRP_MJ_OPERATION_END }
 };
